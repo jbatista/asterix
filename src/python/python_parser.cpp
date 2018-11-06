@@ -41,24 +41,29 @@ int gHeartbeat = 0;
 
 static void debug_trace(char const*format, ...)
 {
-  /* TODO
-  char buffer[1024];
+    // Dummy function
+}
+
+static void exception_trace(char const*format, ...)
+{
+  char buffer[1004];
   va_list args;
   va_start (args, format);
-  vsnprintf (buffer, 1023, format, args);
+  vsnprintf (buffer, 1000, format, args);
   va_end (args);
   strcat(buffer, "\n");
-  LOGERROR(1, "%s", buffer); // TODO
-  */
-  // TODO PyErr_SetString(PyExc_RuntimeError, buffer);
+
+  // Throw exception
+  PyErr_SetString(PyExc_RuntimeError, buffer);
 }
+
 
 /*
  * Initialize Asterix Python with XML configuration file
  */
 int python_init(const char* xml_config_file)
 {
-    Tracer::Configure(debug_trace);
+    Tracer::Configure(exception_trace);
 
     if (!pDefinition)
         pDefinition = new AsterixDefinition();
@@ -83,12 +88,19 @@ int python_init(const char* xml_config_file)
     return 0;
 }
 
-PyObject *python_parse(const unsigned char* pBuf, unsigned int len, int verbose)
+PyObject *python_parse(const unsigned char* pBuf, unsigned int len, int verbose, int strict)
 {
     // get current timstamp in ms since epoch
 	struct timeval tp;
 	gettimeofday(&tp, NULL);
 	unsigned long nTimestamp = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+
+    if (strict) {
+        Tracer::Configure(exception_trace);
+    }
+    else {
+        Tracer::Configure(debug_trace);
+    }
 
     if (inputParser)
     {
@@ -103,7 +115,7 @@ PyObject *python_parse(const unsigned char* pBuf, unsigned int len, int verbose)
     return NULL;
 }
 
-PyObject *python_parse_with_offset(const unsigned char* pBuf, unsigned int len, unsigned int offset, unsigned int blocks_count, int verbose)
+PyObject *python_parse_with_offset(const unsigned char* pBuf, unsigned int len, unsigned int offset, unsigned int blocks_count, int verbose, int strict)
 /* AUTHOR: Krzysztof Rutkowski, ICM UW, krutk@icm.edu.pl
 */
 {
@@ -111,6 +123,13 @@ PyObject *python_parse_with_offset(const unsigned char* pBuf, unsigned int len, 
 	struct timeval tp;
 	gettimeofday(&tp, NULL);
 	unsigned long nTimestamp = tp.tv_sec * 1000 + tp.tv_usec / 1000;
+
+    if (strict) {
+        Tracer::Configure(exception_trace);
+    }
+    else {
+        Tracer::Configure(debug_trace);
+    }
 
     if (inputParser)
     {

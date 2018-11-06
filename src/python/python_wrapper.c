@@ -30,8 +30,9 @@ static int bInitialized = 0;
 //static python_data* getList(python_data* p, PyObject* head);
 
 static char* ini_filename;
-PyObject *my_callback = NULL;
 
+/* todo
+PyObject *my_callback = NULL;
 PyObject*
 say_hello(PyObject* self, PyObject* args, PyObject *kwargs)
 {
@@ -40,19 +41,20 @@ say_hello(PyObject* self, PyObject* args, PyObject *kwargs)
     if (!PyArg_ParseTuple(args, "s", &name))
         return NULL;
 
-    /* Time to call the callback */
+    // Time to call the callback
     PyObject *arglist;
     PyObject *result;
     arglist = Py_BuildValue("(s)", "Hello world!!!");
     result = PyObject_CallObject(my_callback, arglist);
     Py_DECREF(arglist);
     if (result == NULL)
-        return NULL; /* Pass error back */
+        return NULL; // Pass error back
     /// use result...
     Py_DECREF(result);
 
     Py_RETURN_NONE;
 }
+*/
 
 PyObject*
 init(PyObject* self, PyObject* args, PyObject *kwargs)
@@ -119,17 +121,21 @@ parse(PyObject* self, PyObject* args, PyObject *kwargs)
     const char* data;
     Py_ssize_t len;
     int verbose;
+    int strict;
 
-    if (!PyArg_ParseTuple(args, "s#i", &data, &len, &verbose))
+    if (!PyArg_ParseTuple(args, "s#ii", &data, &len, &verbose, &strict)) {
+        PyErr_SetString(PyExc_ValueError, "Wrong parameters");
         return NULL;
+
+    }
 
     if (!bInitialized)
     {
-        printf("Not initialized!");
+        PyErr_SetString(PyExc_ValueError, "Not initialized");
         return NULL;
     }
 
-    PyObject *lstBlocks = python_parse((const unsigned char*) data, len, verbose);
+    PyObject *lstBlocks = python_parse((const unsigned char*) data, len, verbose, strict);
     if (PyErr_Occurred())
         return NULL;
     if (lstBlocks == NULL)
@@ -149,17 +155,20 @@ parse_with_offset(PyObject* self, PyObject* args, PyObject *kwargs)
     unsigned int offset;
     unsigned int blocks_count;
     int verbose;
+    int strict;
 
-    if (!PyArg_ParseTuple(args, "s#IIi", &data, &len, &offset, &blocks_count, &verbose))
-        return NULL;
-
-    if (!bInitialized)
-    {
-        printf("Not initialized!");
+    if (!PyArg_ParseTuple(args, "s#IIii", &data, &len, &offset, &blocks_count, &verbose, &strict)) {
+        PyErr_SetString(PyExc_ValueError, "Wrong parameters");
         return NULL;
     }
 
-    PyObject *py_output = python_parse_with_offset((const unsigned char*) data, len, offset, blocks_count, verbose);
+    if (!bInitialized)
+    {
+        PyErr_SetString(PyExc_ValueError, "Not initialized");
+        return NULL;
+    }
+
+    PyObject *py_output = python_parse_with_offset((const unsigned char*) data, len, offset, blocks_count, verbose, strict);
     if (PyErr_Occurred())
         return NULL;
     if (py_output == NULL) 
@@ -171,7 +180,7 @@ parse_with_offset(PyObject* self, PyObject* args, PyObject *kwargs)
     return py_output;
 }
 
-
+/* todo
 PyObject *
 set_callback(PyObject* self, PyObject *args)
 {
@@ -183,13 +192,13 @@ set_callback(PyObject* self, PyObject *args)
             PyErr_SetString(PyExc_TypeError, "parameter must be callable");
             return NULL;
         }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(my_callback);  /* Dispose of previous callback */
-        my_callback = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
+        Py_XINCREF(temp);         // Add a reference to new callback
+        Py_XDECREF(my_callback);  // Dispose of previous callback
+        my_callback = temp;       // Remember new callback
+        // Boilerplate to return "None"
         Py_INCREF(Py_None);
         result = Py_None;
     }
     return result;
 }
-
+*/

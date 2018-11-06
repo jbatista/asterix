@@ -106,6 +106,7 @@ def parse(data, **kwargs):
         data: Bytes to be parsed
     Kwargs:
         verbose=True: Show description, meaning, max and min values of item (default: True)
+        strict=False: If True then throw RunTime Exception on each parsing error, otherwise ignore errors. (default: False)
     Returns:
         list of asterix records
     """
@@ -114,9 +115,14 @@ def parse(data, **kwargs):
     else:
         verbose = 1
 
+    if 'strict' in kwargs and kwargs['strict']:
+        strict = 1
+    else:
+        strict = 0
+
     if sys.version_info <= (2, 7):
-        return _asterix.parse(buffer(data), verbose)
-    return _asterix.parse(bytes(data), verbose)
+        return _asterix.parse(buffer(data), verbose, strict)
+    return _asterix.parse(bytes(data), verbose, strict)
 
 
 def parse_with_offset(data, offset=0, blocks_count=1000, **kwargs):
@@ -128,6 +134,7 @@ def parse_with_offset(data, offset=0, blocks_count=1000, **kwargs):
         blocks_count: number of blocks data to be returned
     Kwargs:
         verbose=True: Show description, meaning, max and min values of item (default: True)
+        strict=False: If True then throw RunTime Exception on each parsing error, otherwise ignore errors. (default: False)
     Returns:
         tuple of two elements:
             list of asterix records
@@ -138,9 +145,14 @@ def parse_with_offset(data, offset=0, blocks_count=1000, **kwargs):
     else:
         verbose = 1
 
+    if 'strict' in kwargs and kwargs['strict']:
+        strict = 1
+    else:
+        strict = 0
+
     if sys.version_info <= (2, 7):
-        return _asterix.parse_with_offset(buffer(data), offset, blocks_count, verbose)
-    return _asterix.parse_with_offset(bytes(data), offset, blocks_count, verbose)
+        return _asterix.parse_with_offset(buffer(data), offset, blocks_count, verbose, strict)
+    return _asterix.parse_with_offset(bytes(data), offset, blocks_count, verbose, strict)
 
 
 def describe(parsed):
